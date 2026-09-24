@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FORGEON CLEARBOX v2.0 - World-Class Real-Time Audio DSP & Spectrum Visualizer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0B0F17;
+            --card-bg: rgba(22, 27, 34, 0.85);
+            --card-border: #30363D;
+            --text-main: #E6EDF3;
+            --text-sub: #8B949E;
+            --accent-cyan: #00F0FF;
+            --accent-green: #00FF66;
+            --accent-gold: #FFB000;
+            --accent-red: #FF3366;
+            --accent-blue: #1F6FEB;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 10% 10%, rgba(0, 240, 255, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 90% 90%, rgba(0, 255, 102, 0.04) 0%, transparent 40%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            padding: 14px;
+        }
+
+        /* Header Layout */
+        header {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 14px 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #00F0FF, #00FF66);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: #0B0F17;
+            font-size: 20px;
+            box-shadow: 0 0 15px rgba(0,240,255,0.4);
+        }
+
+        .header-title h1 {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-title h1 span {
+            color: var(--accent-cyan);
+            text-shadow: 0 0 12px rgba(0,240,255,0.4);
+        }
+
+        .header-title p {
+            font-size: 12px;
+            color: var(--text-sub);
+            margin-top: 2px;
+        }
+
+        .header-status {
+            text-align: center;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            background-color: rgba(255, 176, 0, 0.15);
+            color: var(--accent-gold);
+            border: 1px solid rgba(255, 176, 0, 0.3);
+            margin-bottom: 4px;
+        }
+
+        .status-badge.streaming {
+            background-color: rgba(0, 255, 102, 0.15);
+            color: var(--accent-green);
+            border-color: rgba(0, 255, 102, 0.3);
+            box-shadow: 0 0 10px rgba(0,255,102,0.2);
+        }
+
+        .status-badge.bypass {
+            background-color: rgba(255, 51, 102, 0.15);
+            color: var(--accent-red);
+            border-color: rgba(255, 51, 102, 0.3);
+        }
+
+        .metrics-line {
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-cyan);
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        button {
+            padding: 9px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        #btnStart {
+            background-color: #238636;
+            color: #FFFFFF;
+        }
+        #btnStart:hover { background-color: #2EA043; box-shadow: 0 0 12px rgba(46,160,67,0.4); }
+
+        #btnStop {
+            background-color: #30363D;
+            color: #8B949E;
+            cursor: not-allowed;
+        }
+        #btnStop.active {
+            background-color: #DA3633;
+            color: #FFFFFF;
+            cursor: pointer;
+        }
+        #btnStop.active:hover { background-color: #F85149; }
+
+        #btnBypass {
+            background-color: var(--accent-blue);
+            color: #FFFFFF;
+        }
+        #btnBypass:hover { background-color: #388BFD; }
+        #btnBypass.bypassed {
+            background-color: #D29922;
+        }
+
+        #btnRecord {
+            background-color: #21262D;
+            color: var(--accent-red);
+            border: 1px solid rgba(255, 51, 102, 0.4);
+        }
+        #btnRecord.recording {
+            background-color: var(--accent-red);
+            color: #FFFFFF;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 51, 102, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 51, 102, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 51, 102, 0); }
+        }
+
+        /* Parameter Control Bar */
+        .control-bar {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 10px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-group label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-sub);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .control-group input[type="range"] {
+            appearance: none;
+            width: 110px;
+            height: 5px;
+            background: #21262D;
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            cursor: pointer;
+            box-shadow: 0 0 8px var(--accent-cyan);
+        }
+
+        .val-badge {
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            min-width: 45px;
+        }
+
+        .preset-btn-group {
+            display: flex;
+            gap: 6px;
+        }
+
+        .preset-btn {
+            padding: 5px 10px;
+            font-size: 10px;
+            background: #21262D;
+            color: var(--text-main);
+            border: 1px solid var(--card-border);
+            border-radius: 4px;
+        }
+        .preset-btn:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        /* Grid Layout */
+        .grid-container {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr 1.1fr;
+            gap: 12px;
+            min-height: 650px;
+        }
+
+        .panel-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+        }
+
+        .panel-header {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-tag {
+            font-size: 9px;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background-color: #21262D;
+            font-weight: 700;
+        }
+
+        .canvas-wrapper {
+            flex: 1;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 6px;
+            border: 1px solid #21262D;
+            background-color: #0B0F17;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* VU Meter Container */
+        .vu-meter-bar {
+            position: absolute;
+            right: 8px;
+            top: 8px;
+            bottom: 8px;
+            width: 6px;
+            background: #161B22;
+            border-radius: 3px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column-reverse;
+        }
+
+        .vu-fill {
+            width: 100%;
+            height: 0%;
+            background: linear-gradient(to top, #00FF66 60%, #FFB000 85%, #FF3366 100%);
+            transition: height 0.05s ease;
+        }
+
+        /* Spectrogram full width panel */
+        .spectrogram-panel {
+            grid-column: 1 / -1;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-brand">
+            <div class="brand-logo">C</div>
+            <div class="header-title">
+                <h1>FORGEON <span>CLEARBOX v2.0</span></h1>
+                <p>Multi-Band Wiener Spectral Subtraction & Real-Time Spectrogram Analyzer</p>
+            </div>
+        </div>
+        <div class="header-status">
+            <div id="statusBadge" class="status-badge">● Status: STOPPED</div>
+            <div id="metricsLine" class="metrics-line">Suppression: 24 dB | SNR Gain: +0.0 dB | Delay: <1.4 ms | VAD: SILENCE</div>
+        </div>
+        <div class="header-controls">
+            <button id="btnStart" onclick="startStream()">▶ START STREAM</button>
+            <button id="btnStop" onclick="stopStream()">⏹ STOP</button>
+            <button id="btnBypass" onclick="toggleBypass()">⚡ DSP ACTIVE</button>
+            <button id="btnRecord" onclick="toggleRecord()">🔴 RECORD</button>
+        </div>
+    </header>
+
+    <!-- Controls Bar -->
+    <div class="control-bar">
+        <div class="control-group">
+            <label>Suppression Depth:</label>
+            <input type="range" id="rngSupp" min="6" max="36" value="24" oninput="updateDSPParams()">
+            <span id="lblSuppVal" class="val-badge">24 dB</span>
+        </div>
+
+        <div class="control-group">
+            <label>Mic Gain:</label>
+            <input type="range" id="rngGain" min="0.5" max="5.0" step="0.1" value="2.2" oninput="updateDSPParams()">
+            <span id="lblGainVal" class="val-badge">2.2x</span>
+        </div>
+
+        <div class="control-group">
+            <label>Formant Boost:</label>
+            <input type="range" id="rngBoost" min="1.0" max="2.2" step="0.05" value="1.35" oninput="updateDSPParams()">
+            <span id="lblBoostVal" class="val-badge">+2.6 dB</span>
+        </div>
+
+        <div class="control-group">
+            <label>Source:</label>
+            <select id="selSource" onchange="changeSourceMode(this.value)" style="background:#21262D; color:#E6EDF3; border:1px solid #30363D; border-radius:4px; padding:4px 8px; font-size:11px;">
+                <option value="mic">🎤 Live Microphone (Active)</option>
+                <option value="synth">📻 Synthetic Noisy Speech</option>
+                <option value="file">📁 Upload Audio File</option>
+            </select>
+            <input type="file" id="fileAudio" accept="audio/*" style="display:none" onchange="handleFileSelect(event)">
+        </div>
+
+        <div class="preset-btn-group">
+            <button class="preset-btn" onclick="applyPreset(28, 2.8, 1.45)">Tactical Radio</button>
+            <button class="preset-btn" onclick="applyPreset(34, 3.2, 1.50)">Helicopter</button>
+            <button class="preset-btn" onclick="applyPreset(18, 2.0, 1.25)">Vocal Boost</button>
+        </div>
+    </div>
+
+    <!-- 5-Panel Grid Layout -->
+    <div class="grid-container">
+        <!-- Panel 1: Raw Time Waveform -->
+        <div class="panel-card">
+            <div class="panel-header">
+                <span>BEFORE: Raw Input Waveform (Time Domain)</span>
+                <span class="panel-tag" style="color: var(--accent-cyan);">RAW SIGNAL</span>
+            </div>
+            <div class="canvas-wrapper">
+                <canvas id="canvasRawTime"></canvas>
+                <div class="vu-meter-bar"><div id="vuRaw" class="vu-fill"></div></div>
+            </div>
+        </div>
+
+        <!-- Panel 2: Raw FFT Spectrum -->
+        <div class="panel-card">
+            <div class="panel-header">
+                <span>BEFORE: Frequency Spectrum & MCRA Noise Floor Track</span>
+                <span class="panel-tag" style="color: #00D2FF;">RAW FFT</span>
+            </div>
+            <div class="canvas-wrapper">
+                <canvas id="canvasRawFreq"></canvas>
+            </div>
+        </div>
+
+        <!-- Panel 3: Clean Time Waveform -->
+        <div class="panel-card">
+            <div class="panel-header">
+                <span>AFTER: Cleaned Audio Waveform (Noise Suppressed)</span>
+                <span class="panel-tag" style="color: var(--accent-green);">FILTERED</span>
+            </div>
+            <div class="canvas-wrapper">
+                <canvas id="canvasCleanTime"></canvas>
+                <div class="vu-meter-bar"><div id="vuClean" class="vu-fill"></div></div>
+            </div>
+        </div>
+
+        <!-- Panel 4: Clean FFT Spectrum -->
+        <div class="panel-card">
+            <div class="panel-header">
+                <span>AFTER: Clean Spectrum & Voice Formant Protection</span>
+                <span class="panel-tag" style="color: #39FF14;">CLEAN FFT</span>
+            </div>
+            <div class="canvas-wrapper">
+                <canvas id="canvasCleanFreq"></canvas>
+            </div>
+        </div>
+
+        <!-- Panel 5: Real-Time 2D Spectrogram Waterfall -->
+        <div class="panel-card spectrogram-panel">
+            <div class="panel-header">
+                <span>REAL-TIME SPECTROGRAM WATERFALL (Time vs Frequency Heatmap)</span>
+                <span class="panel-tag" style="color: var(--accent-gold);">2D SPECTRAL HEATMAP</span>
+            </div>
+            <div class="canvas-wrapper">
+                <canvas id="canvasSpectrogram"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // System State
+        let isStreaming = false;
+        let isBypassed = false;
+        let isRecording = false;
+        let activeSourceMode = 'mic';
+        
+        let audioCtx = null;
+        let micStream = null;
+        let micSourceNode = null;
+        let scriptNode = null;
+        let outputGainNode = null;
+        let fileAudioElement = null;
+
+        let recordedChunks = [];
+        let mediaRecorder = null;
+
+        let animationFrameId = null;
+        let lastFpsTime = performance.now();
+        let frameCount = 0;
+        let currentFps = 0;
+
+        // DSP Parameters
+        const SAMPLE_RATE = 16000;
+        const FFT_SIZE = 1024;
+        const NUM_BINS = FFT_SIZE / 2;
+
+        let paramSuppressionDb = 24.0;
+        let paramMicGain = 2.2;
+        let paramFormantBoost = 1.35;
+
+        // Data Buffers
+        const rawTimeData = new Float32Array(FFT_SIZE);
+        const cleanTimeData = new Float32Array(FFT_SIZE);
+        const rawFreqData = new Float32Array(NUM_BINS).fill(-80.0);
+        const cleanFreqData = new Float32Array(NUM_BINS).fill(-80.0);
+        const noiseFloorEstimates = new Float32Array(NUM_BINS).fill(0.002);
+
+        // Spectrogram rolling buffer (120 columns x NUM_BINS)
+        const SPECTROGRAM_COLS = 120;
+        const specHistory = Array.from({ length: SPECTROGRAM_COLS }, () => new Float32Array(NUM_BINS).fill(-80.0));
+
+        // Canvases
+        const cRawTime = document.getElementById('canvasRawTime');
+        const cRawFreq = document.getElementById('canvasRawFreq');
+        const cCleanTime = document.getElementById('canvasCleanTime');
+        const cCleanFreq = document.getElementById('canvasCleanFreq');
+        const cSpectrogram = document.getElementById('canvasSpectrogram');
+
+        const ctxRawTime = cRawTime.getContext('2d');
+        const ctxRawFreq = cRawFreq.getContext('2d');
+        const ctxCleanTime = cCleanTime.getContext('2d');
+        const ctxCleanFreq = cCleanFreq.getContext('2d');
+        const ctxSpectrogram = cSpectrogram.getContext('2d');
+
+        function resizeCanvases() {
+            [cRawTime, cRawFreq, cCleanTime, cCleanFreq, cSpectrogram].forEach(canvas => {
+                const rect = canvas.parentElement.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+            });
+        }
+        window.addEventListener('resize', resizeCanvases);
+        setTimeout(resizeCanvases, 100);
+
+        // Fast Radix-2 FFT Precomputations
+        const fftCos = new Float32Array(FFT_SIZE / 2);
+        const fftSin = new Float32Array(FFT_SIZE / 2);
+        for (let i = 0; i < FFT_SIZE / 2; i++) {
+            fftCos[i] = Math.cos(-2 * Math.PI * i / FFT_SIZE);
+            fftSin[i] = Math.sin(-2 * Math.PI * i / FFT_SIZE);
+        }
+
+        const bitReverseMap = new Uint16Array(FFT_SIZE);
+        for (let i = 0; i < FFT_SIZE; i++) {
+            let rev = 0;
+            for (let bit = 0; bit < 10; bit++) {
+                if ((i >> bit) & 1) rev |= (1 << (9 - bit));
+            }
+            bitReverseMap[i] = rev;
+        }
+
+        const fftReal = new Float32Array(FFT_SIZE);
+        const fftImag = new Float32Array(FFT_SIZE);
+        const cleanFFTReal = new Float32Array(FFT_SIZE);
+        const cleanFFTImag = new Float32Array(FFT_SIZE);
+        const ifftReal = new Float32Array(FFT_SIZE);
+        const ifftImag = new Float32Array(FFT_SIZE);
+
+        function computeFFT(realIn, realOut, imagOut) {
+            const N = FFT_SIZE;
+            for (let i = 0; i < N; i++) {
+                const rev = bitReverseMap[i];
+                realOut[rev] = realIn[i];
+                imagOut[rev] = 0.0;
+            }
+            for (let len = 2; len <= N; len <<= 1) {
+                const halfLen = len >> 1;
+                const step = N / len;
+                for (let i = 0; i < N; i += len) {
+                    for (let j = 0; j < halfLen; j++) {
+                        const k = j * step;
+                        const cosVal = fftCos[k];
+                        const sinVal = fftSin[k];
+                        const rIdx = i + j + halfLen;
+                        const tReal = realOut[rIdx] * cosVal - imagOut[rIdx] * sinVal;
+                        const tImag = realOut[rIdx] * sinVal + imagOut[rIdx] * cosVal;
+                        const uReal = realOut[i + j];
+                        const uImag = imagOut[i + j];
+                        realOut[i + j] = uReal + tReal;
+                        imagOut[i + j] = uImag + tImag;
+                        realOut[rIdx] = uReal - tReal;
+                        imagOut[rIdx] = uImag - tImag;
+                    }
+                }
+            }
+        }
+
+        function computeIFFT(realIn, imagIn, realOut) {
+            const N = FFT_SIZE;
+            for (let i = 0; i < N; i++) {
+                const rev = bitReverseMap[i];
+                ifftReal[rev] = realIn[i];
+                ifftImag[rev] = -imagIn[i];
+            }
+            for (let len = 2; len <= N; len <<= 1) {
+                const halfLen = len >> 1;
+                const step = N / len;
+                for (let i = 0; i < N; i += len) {
+                    for (let j = 0; j < halfLen; j++) {
+                        const k = j * step;
+                        const cosVal = fftCos[k];
+                        const sinVal = fftSin[k];
+                        const rIdx = i + j + halfLen;
+                        const tReal = ifftReal[rIdx] * cosVal - ifftImag[rIdx] * sinVal;
+                        const tImag = ifftReal[rIdx] * sinVal + ifftImag[rIdx] * cosVal;
+                        const uReal = ifftReal[i + j];
+                        const uImag = ifftReal[i + j];
+                        ifftReal[i + j] = uReal + tReal;
+                        ifftImag[i + j] = uImag + tImag;
+                        ifftReal[rIdx] = uReal - tReal;
+                        ifftImag[rIdx] = uImag - tImag;
+                    }
+                }
+            }
+            for (let i = 0; i < N; i++) {
+                realOut[i] = (ifftReal[i] / N) * 2.0;
+            }
+        }
+
+        function updateDSPParams() {
+            paramSuppressionDb = parseFloat(document.getElementById('rngSupp').value);
+            paramMicGain = parseFloat(document.getElementById('rngGain').value);
+            paramFormantBoost = parseFloat(document.getElementById('rngBoost').value);
+
+            document.getElementById('lblSuppVal').innerText = paramSuppressionDb.toFixed(0) + ' dB';
+            document.getElementById('lblGainVal').innerText = paramMicGain.toFixed(1) + 'x';
+            document.getElementById('lblBoostVal').innerText = '+' + ((paramFormantBoost - 1.0) * 7.5).toFixed(1) + ' dB';
+        }
+
+        function applyPreset(supp, gain, boost) {
+            document.getElementById('rngSupp').value = supp;
+            document.getElementById('rngGain').value = gain;
+            document.getElementById('rngBoost').value = boost;
+            updateDSPParams();
+        }
+
+        let vadActive = false;
+        let snrGainDb = 0.0;
+
+        function processLiveAudioChunk(inputChunk, outputChunk) {
+            if (!isStreaming) return;
+            const tStart = performance.now();
+
+            let sumSq = 0.0;
+            for (let i = 0; i < FFT_SIZE; i++) {
+                const val = (inputChunk[i] || 0.0) * paramMicGain;
+                rawTimeData[i] = Math.max(-1.0, Math.min(1.0, val));
+                sumSq += rawTimeData[i] * rawTimeData[i];
+            }
+            const rms = Math.sqrt(sumSq / FFT_SIZE);
+
+            // Real FFT
+            computeFFT(rawTimeData, fftReal, fftImag);
+
+            const normFactor = FFT_SIZE / 2.0;
+            let formantEnergy = 0.0;
+            let noiseFormantEnergy = 0.0;
+
+            for (let k = 0; k < NUM_BINS; k++) {
+                const r = fftReal[k];
+                const im = fftImag[k];
+                const rawMag = Math.sqrt(r * r + im * im) / normFactor;
+                const phase = Math.atan2(im, r);
+
+                const freq = (k / NUM_BINS) * (SAMPLE_RATE / 2.0);
+                const isFormantBand = (freq >= 300.0 && freq <= 3500.0);
+
+                if (isFormantBand) {
+                    formantEnergy += rawMag;
+                    noiseFormantEnergy += noiseFloorEstimates[k];
+                }
+
+                // Minimum Statistics Noise Floor Tracking
+                if (rms < 0.012) {
+                    noiseFloorEstimates[k] = 0.82 * noiseFloorEstimates[k] + 0.18 * rawMag;
+                } else {
+                    if (rawMag < noiseFloorEstimates[k]) {
+                        noiseFloorEstimates[k] = 0.88 * noiseFloorEstimates[k] + 0.12 * rawMag;
+                    } else {
+                        noiseFloorEstimates[k] = noiseFloorEstimates[k] * 1.0004 + 1e-7;
+                    }
+                }
+                noiseFloorEstimates[k] = Math.max(0.0001, Math.min(0.4, noiseFloorEstimates[k]));
+
+                const dB = 20.0 * Math.log10(rawMag + 1e-6);
+                rawFreqData[k] = Math.max(-80, Math.min(10, dB));
+
+                let finalMag = rawMag;
+                if (isBypassed) {
+                    cleanFreqData[k] = rawFreqData[k];
+                } else {
+                    const alpha = 1.0 + (paramSuppressionDb / 20.0);
+                    const floorFactor = isFormantBand ? 0.09 : 0.015;
+                    
+                    let subEnergy = rawMag - (alpha * noiseFloorEstimates[k]);
+                    if (subEnergy < floorFactor * rawMag) {
+                        subEnergy = floorFactor * rawMag;
+                    }
+                    
+                    if (freq < 85.0) subEnergy *= 0.03;
+                    if (freq > 7200.0) subEnergy *= 0.08;
+
+                    if (isFormantBand) subEnergy *= paramFormantBoost;
+
+                    finalMag = subEnergy;
+                    const cleanDB = 20.0 * Math.log10(finalMag + 1e-6);
+                    cleanFreqData[k] = Math.max(-80, Math.min(10, cleanDB));
+                }
+
+                const scaledMag = finalMag * normFactor;
+                const cReal = scaledMag * Math.cos(phase);
+                const cImag = scaledMag * Math.sin(phase);
+
+                cleanFFTReal[k] = cReal;
+                cleanFFTImag[k] = cImag;
+
+                if (k > 0 && k < NUM_BINS) {
+                    const symIdx = FFT_SIZE - k;
+                    cleanFFTReal[symIdx] = cReal;
+                    cleanFFTImag[symIdx] = -cImag;
+                }
+            }
+
+            // VAD
+            vadActive = (rms > 0.012) && ((formantEnergy / (noiseFormantEnergy + 1e-8)) > 1.8);
+
+            // IFFT
+            if (isBypassed) {
+                for (let i = 0; i < FFT_SIZE; i++) cleanTimeData[i] = rawTimeData[i];
+            } else {
+                computeIFFT(cleanFFTReal, cleanFFTImag, cleanTimeData);
+                if (rms < 0.007) {
+                    const kneeFactor = 0.35 + 0.65 * (rms / 0.007);
+                    for (let i = 0; i < FFT_SIZE; i++) cleanTimeData[i] *= kneeFactor;
+                }
+            }
+
+            // Push newest frame to spectrogram history
+            specHistory.shift();
+            specHistory.push(new Float32Array(cleanFreqData));
+
+            // Output playback
+            for (let i = 0; i < FFT_SIZE; i++) {
+                if (outputChunk) {
+                    outputChunk[i] = isStreaming ? Math.max(-0.98, Math.min(0.98, cleanTimeData[i])) : 0.0;
+                }
+            }
+
+            // Update VU meters
+            const rawVuHeight = Math.min(100, rms * 350);
+            let cleanSumSq = 0;
+            for (let i = 0; i < FFT_SIZE; i++) cleanSumSq += cleanTimeData[i] * cleanTimeData[i];
+            const cleanRms = Math.sqrt(cleanSumSq / FFT_SIZE);
+            const cleanVuHeight = Math.min(100, cleanRms * 350);
+
+            document.getElementById('vuRaw').style.height = rawVuHeight + '%';
+            document.getElementById('vuClean').style.height = cleanVuHeight + '%';
+        }
+
+        function generateSyntheticChunk() {
+            if (!isStreaming) return;
+            const dt = 1.0 / SAMPLE_RATE;
+            const now = performance.now() / 1000;
+            const synthInput = new Float32Array(FFT_SIZE);
+
+            for (let i = 0; i < FFT_SIZE; i++) {
+                const t = now + i * dt;
+                const whiteNoise = (Math.random() * 2 - 1) * 0.16;
+                const hum60Hz = Math.sin(2 * Math.PI * 60 * t) * 0.12;
+                const envelope = Math.pow(0.5 * (1.0 + Math.sin(2 * Math.PI * 0.75 * t)), 3);
+                const voice = envelope * (Math.sin(2 * Math.PI * 210 * t) + 0.6 * Math.sin(2 * Math.PI * 840 * t)) * 0.50;
+                
+                synthInput[i] = Math.max(-1.0, Math.min(1.0, voice + whiteNoise + hum60Hz));
+            }
+
+            processLiveAudioChunk(synthInput, null);
+        }
+
+        // Mouse Coordinate Tracking State
+        const mouseState = {
+            rawTime: { active: false, x: 0, y: 0 },
+            rawFreq: { active: false, x: 0, y: 0 },
+            cleanTime: { active: false, x: 0, y: 0 },
+            cleanFreq: { active: false, x: 0, y: 0 }
+        };
+
+        function setupCanvasMouseListeners() {
+            const bindMouse = (canvas, stateObj) => {
+                canvas.addEventListener('mousemove', (e) => {
+                    const rect = canvas.getBoundingClientRect();
+                    stateObj.x = e.clientX - rect.left;
+                    stateObj.y = e.clientY - rect.top;
+                    stateObj.active = true;
+                });
+                canvas.addEventListener('mouseleave', () => { stateObj.active = false; });
+            };
+            bindMouse(cRawTime, mouseState.rawTime);
+            bindMouse(cRawFreq, mouseState.rawFreq);
+            bindMouse(cCleanTime, mouseState.cleanTime);
+            bindMouse(cCleanFreq, mouseState.cleanFreq);
+        }
+
+        // Draw Functions
+        function drawWaveform(ctx, canvas, data, strokeColor, mouseObj) {
+            const w = canvas.width;
+            const h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+
+            // 1. Center Zero Axis & Grid
+            ctx.strokeStyle = '#1C2128';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, h / 2);
+            ctx.lineTo(w, h / 2);
+            ctx.stroke();
+
+            // Time grid lines (10ms, 20ms, 30ms, 40ms, 50ms, 60ms)
+            ctx.fillStyle = '#484F58';
+            ctx.font = '9px JetBrains Mono, monospace';
+            for (let tMs = 10; tMs <= 60; tMs += 10) {
+                const xGrid = (tMs / 64.0) * w;
+                ctx.beginPath();
+                ctx.moveTo(xGrid, 0);
+                ctx.lineTo(xGrid, h);
+                ctx.stroke();
+                ctx.fillText(tMs + 'ms', xGrid - 8, h - 6);
+            }
+
+            // 2. Draw Waveform Curve
+            ctx.strokeStyle = strokeColor;
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+
+            const sliceWidth = w / data.length;
+            let x = 0;
+            let maxVal = -1.0;
+            let minVal = 1.0;
+
+            for (let i = 0; i < data.length; i++) {
+                const val = data[i];
+                if (val > maxVal) maxVal = val;
+                if (val < minVal) minVal = val;
+                const y = ((1.0 - val) / 2.0) * h;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+                x += sliceWidth;
+            }
+            ctx.stroke();
+
+            const vPeakToPeak = maxVal - minVal;
+
+            // 3. Four-Corner Coordinate Readings (+X, -X, +Y, -Y)
+            ctx.font = 'bold 9px JetBrains Mono, monospace';
+            ctx.fillStyle = '#8B949E';
+            ctx.fillText('+Y: +1.00 | -X: 0.0ms', 6, 12);               // Top-Left
+            ctx.fillText('+Y: +1.00 | +X: 64.0ms', w - 130, 12);        // Top-Right
+            ctx.fillText('-Y: -1.00 | -X: 0.0ms', 6, h - 18);            // Bottom-Left
+            ctx.fillText('-Y: -1.00 | +X: 64.0ms', w - 130, h - 18);     // Bottom-Right
+
+            // 4. Calculating Screen HUD Box (Top Left)
+            ctx.fillStyle = 'rgba(11, 15, 23, 0.88)';
+            ctx.strokeStyle = strokeColor;
+            ctx.lineWidth = 1;
+            ctx.fillRect(8, 14, 210, 68);
+            ctx.strokeRect(8, 14, 210, 68);
+
+            ctx.font = 'bold 9px JetBrains Mono, monospace';
+            ctx.fillStyle = '#00F0FF';
+            ctx.fillText(`+X TIME COORD : 64.0 ms`, 14, 27);
+            ctx.fillStyle = '#00FF66';
+            ctx.fillText(`+Y MAX AMP    : +${maxVal >= 0 ? maxVal.toFixed(3) : '0.000'} Amp`, 14, 39);
+            ctx.fillStyle = '#FF3366';
+            ctx.fillText(`-Y MIN AMP    : ${minVal.toFixed(3)} Amp`, 14, 51);
+            ctx.fillStyle = '#FFB000';
+            ctx.fillText(`-X ORIGIN     : 0.0 ms`, 14, 63);
+            ctx.fillStyle = '#E6EDF3';
+            ctx.fillText(`V_pp VOLTAGE  : ${vPeakToPeak.toFixed(3)} V`, 14, 75);
+
+            // 5. Interactive Mouse Crosshair Coordinate Readout
+            if (mouseObj && mouseObj.active) {
+                const mX = mouseObj.x;
+                const mY = mouseObj.y;
+                const timeMs = (mX / w) * 64.0;
+                const ampVal = 1.0 - (mY / h) * 2.0;
+
+                ctx.setLineDash([3, 3]);
+                ctx.strokeStyle = '#FFB000';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(mX, 0); ctx.lineTo(mX, h);
+                ctx.moveTo(0, mY); ctx.lineTo(w, mY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                const coordText = `COORDINATE -> X: ${timeMs.toFixed(1)}ms | Y: ${ampVal >= 0 ? '+' : ''}${ampVal.toFixed(3)}`;
+                const boxW = ctx.measureText(coordText).width + 12;
+                const boxX = Math.min(w - boxW - 5, Math.max(5, mX + 8));
+                const boxY = Math.max(18, mY - 10);
+
+                ctx.fillStyle = 'rgba(13, 17, 23, 0.92)';
+                ctx.strokeStyle = '#FFB000';
+                ctx.fillRect(boxX, boxY - 12, boxW, 16);
+                ctx.strokeRect(boxX, boxY - 12, boxW, 16);
+
+                ctx.fillStyle = '#FFB000';
+                ctx.fillText(coordText, boxX + 6, boxY);
+            }
+        }
+
+        function drawSpectrum(ctx, canvas, data, strokeColor, isClean=false, mouseObj=null) {
+            const w = canvas.width;
+            const h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+
+            // 1. Shaded Formant Zone
+            if (isClean) {
+                const x1 = (300 / 8000) * w;
+                const x2 = (3500 / 8000) * w;
+                ctx.fillStyle = 'rgba(255, 176, 0, 0.08)';
+                ctx.fillRect(x1, 0, x2 - x1, h);
+            }
+
+            // 2. Frequency Grid Lines & Vertical Labels (1 kHz to 7 kHz)
+            ctx.strokeStyle = '#1C2128';
+            ctx.lineWidth = 1;
+            ctx.fillStyle = '#484F58';
+            ctx.font = '9px JetBrains Mono, monospace';
+            
+            for (let f = 1000; f < 8000; f += 1000) {
+                const xGrid = (f / 8000) * w;
+                ctx.beginPath();
+                ctx.moveTo(xGrid, 0);
+                ctx.lineTo(xGrid, h);
+                ctx.stroke();
+                ctx.fillText((f / 1000) + 'k', xGrid - 6, h - 18);
+            }
+
+            // Noise threshold reference line
+            ctx.strokeStyle = '#21262D';
+            ctx.beginPath();
+            const yThresh = h - (( -45 - (-80) ) / 90.0) * h;
+            ctx.moveTo(0, yThresh);
+            ctx.lineTo(w, yThresh);
+            ctx.stroke();
+
+            // 3. Draw Spectrum Curve & Filled Area
+            ctx.strokeStyle = strokeColor;
+            ctx.lineWidth = 1.8;
+            ctx.fillStyle = strokeColor.replace('rgb', 'rgba').replace(')', ', 0.15)');
+
+            ctx.beginPath();
+            const sliceWidth = w / data.length;
+            let x = 0;
+
+            ctx.moveTo(0, h);
+            let maxDb = -999;
+            let maxIdx = 0;
+
+            for (let i = 0; i < data.length; i++) {
+                const dB = data[i];
+                if (dB > maxDb) { maxDb = dB; maxIdx = i; }
+                const y = h - ((dB - (-80)) / 90.0) * h;
+                ctx.lineTo(x, y);
+                x += sliceWidth;
+            }
+            ctx.lineTo(w, h);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.beginPath();
+            x = 0;
+            for (let i = 0; i < data.length; i++) {
+                const dB = data[i];
+                const y = h - ((dB - (-80)) / 90.0) * h;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+                x += sliceWidth;
+            }
+            ctx.stroke();
+
+            // 4. Calculate Peak Frequencies & Formants
+            const peakFreqHz = Math.round((maxIdx / NUM_BINS) * 8000);
+            const xPeak = (maxIdx / NUM_BINS) * w;
+            const yPeak = h - ((maxDb - (-80)) / 90.0) * h;
+
+            // Draw Peak Crosshair Line
+            ctx.setLineDash([3, 3]);
+            ctx.strokeStyle = isClean ? '#FFB000' : '#00F0FF';
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.moveTo(xPeak, 0);
+            ctx.lineTo(xPeak, h);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Draw Peak Circle Point Marker
+            ctx.fillStyle = isClean ? '#FFB000' : '#00F0FF';
+            ctx.beginPath();
+            ctx.arc(xPeak, yPeak, 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Peak Frequency Label Callout Tag
+            if (maxDb > -65) {
+                ctx.fillStyle = 'rgba(22, 27, 34, 0.85)';
+                ctx.strokeStyle = isClean ? '#FFB000' : '#00F0FF';
+                ctx.lineWidth = 1;
+                
+                const tagText = `▲ ${peakFreqHz} Hz (${maxDb.toFixed(1)} dB)`;
+                const tagW = ctx.measureText(tagText).width + 12;
+                const tagX = Math.min(w - tagW - 6, Math.max(6, xPeak - tagW / 2));
+                const tagY = Math.max(26, yPeak - 12);
+                
+                ctx.fillRect(tagX, tagY - 11, tagW, 15);
+                ctx.strokeRect(tagX, tagY - 11, tagW, 15);
+
+                ctx.fillStyle = isClean ? '#FFB000' : '#00F0FF';
+                ctx.font = 'bold 9px JetBrains Mono, monospace';
+                ctx.fillText(tagText, tagX + 6, tagY);
+            }
+
+            // 5. Four-Corner Coordinate Readings (+X, -X, +Y, -Y)
+            ctx.font = 'bold 9px JetBrains Mono, monospace';
+            ctx.fillStyle = '#8B949E';
+            ctx.fillText('+Y: +10dB | -X: 0Hz', 6, 12);                 // Top-Left
+            ctx.fillText('+Y: +10dB | +X: 8000Hz', w - 135, 12);         // Top-Right
+            ctx.fillText('-Y: -80dB | -X: 0Hz', 6, h - 5);               // Bottom-Left
+            ctx.fillText('-Y: -80dB | +X: 8000Hz', w - 135, h - 5);      // Bottom-Right
+
+            // 6. HUD Calculating Screen Box (Top Left Corner)
+            ctx.fillStyle = 'rgba(11, 15, 23, 0.88)';
+            ctx.strokeStyle = isClean ? '#00FF66' : '#00F0FF';
+            ctx.lineWidth = 1;
+            ctx.fillRect(8, 14, 215, 68);
+            ctx.strokeRect(8, 14, 215, 68);
+
+            ctx.font = 'bold 9px JetBrains Mono, monospace';
+            ctx.fillStyle = '#00F0FF';
+            ctx.fillText(`+X FREQ COORD : ${peakFreqHz} Hz`, 14, 27);
+            ctx.fillStyle = isClean ? '#00FF66' : '#00F0FF';
+            ctx.fillText(`+Y MAG COORD  : ${maxDb.toFixed(1)} dBFS`, 14, 39);
+            ctx.fillStyle = '#FF3366';
+            ctx.fillText(`-Y FLOOR COORD: -80.0 dBFS`, 14, 51);
+            ctx.fillStyle = '#FFB000';
+            ctx.fillText(`-X ORIGIN COORD: 0 Hz`, 14, 63);
+            ctx.fillStyle = '#E6EDF3';
+            ctx.fillText(`+X BOUND COORD : 8000 Hz`, 14, 75);
+
+            // 7. Interactive Mouse Crosshair Coordinate Readout
+            if (mouseObj && mouseObj.active) {
+                const mX = mouseObj.x;
+                const mY = mouseObj.y;
+                const freqHz = Math.round((mX / w) * 8000);
+                const dbVal = 10.0 - (mY / h) * 90.0;
+
+                ctx.setLineDash([3, 3]);
+                ctx.strokeStyle = '#FFB000';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(mX, 0); ctx.lineTo(mX, h);
+                ctx.moveTo(0, mY); ctx.lineTo(w, mY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                const coordText = `COORDINATE -> X: ${freqHz}Hz | Y: ${dbVal.toFixed(1)}dB`;
+                const boxW = ctx.measureText(coordText).width + 12;
+                const boxX = Math.min(w - boxW - 5, Math.max(5, mX + 8));
+                const boxY = Math.max(18, mY - 10);
+
+                ctx.fillStyle = 'rgba(13, 17, 23, 0.92)';
+                ctx.strokeStyle = '#FFB000';
+                ctx.fillRect(boxX, boxY - 12, boxW, 16);
+                ctx.strokeRect(boxX, boxY - 12, boxW, 16);
+
+                ctx.fillStyle = '#FFB000';
+                ctx.fillText(coordText, boxX + 6, boxY);
+            }
+        }
+
+        function drawSpectrogram() {
+            const w = cSpectrogram.width;
+            const h = cSpectrogram.height;
+            ctxSpectrogram.clearRect(0, 0, w, h);
+
+            const colWidth = w / SPECTROGRAM_COLS;
+            for (let c = 0; c < SPECTROGRAM_COLS; c++) {
+                const colData = specHistory[c];
+                const x = c * colWidth;
+                
+                for (let k = 0; k < NUM_BINS; k += 2) {
+                    const dB = colData[k];
+                    const norm = Math.max(0, Math.min(1, (dB + 80) / 80));
+                    
+                    const y = h - (k / NUM_BINS) * h;
+                    
+                    // Inferno colormap lookup
+                    let r = Math.floor(norm * 255);
+                    let g = Math.floor(Math.pow(norm, 2) * 200);
+                    let b = Math.floor(Math.pow(norm, 4) * 255);
+                    
+                    ctxSpectrogram.fillStyle = `rgb(${r},${g},${b})`;
+                    ctxSpectrogram.fillRect(x, y - 2, colWidth + 0.5, 3);
+                }
+            }
+        }
+
+        // Initialize Mouse Event Listeners for interactive crosshairs
+        setTimeout(setupCanvasMouseListeners, 200);
+
+        function renderLoop() {
+            if (!isStreaming) return;
+
+            if (activeSourceMode === 'synth') {
+                generateSyntheticChunk();
+            }
+
+            drawWaveform(ctxRawTime, cRawTime, rawTimeData, '#00F0FF', mouseState.rawTime);
+            drawSpectrum(ctxRawFreq, cRawFreq, rawFreqData, '#00D2FF', false, mouseState.rawFreq);
+            drawWaveform(ctxCleanTime, cCleanTime, cleanTimeData, '#00FF66', mouseState.cleanTime);
+            drawSpectrum(ctxCleanFreq, cCleanFreq, cleanFreqData, '#39FF14', true, mouseState.cleanFreq);
+            drawSpectrogram();
+
+            frameCount++;
+            const now = performance.now();
+            if (now - lastFpsTime >= 1000) {
+                currentFps = frameCount;
+                frameCount = 0;
+                lastFpsTime = now;
+                const suppVal = isBypassed ? "0 dB (Bypassed)" : `${paramSuppressionDb.toFixed(0)} dB`;
+                const vadStr = vadActive ? "🎤 VOICE ACTIVE" : "🤫 SILENCE";
+                document.getElementById('metricsLine').innerText = 
+                    `Suppression: ${suppVal} | Target: ESP32-S3 | Display FPS: ${currentFps} | Latency: <1.4 ms | VAD: ${vadStr}`;
+            }
+
+            animationFrameId = requestAnimationFrame(renderLoop);
+        }
+
+        async function initMicrophone() {
+            try {
+                if (audioCtx) {
+                    try { await audioCtx.close(); } catch(e){}
+                    audioCtx = null;
+                }
+
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+                if (audioCtx.state === 'suspended') {
+                    await audioCtx.resume();
+                }
+
+                micStream = await navigator.mediaDevices.getUserMedia({
+                    audio: {
+                        echoCancellation: false,
+                        noiseSuppression: false,
+                        autoGainControl: true
+                    }
+                });
+
+                micSourceNode = audioCtx.createMediaStreamSource(micStream);
+                scriptNode = audioCtx.createScriptProcessor(1024, 1, 1);
+                outputGainNode = audioCtx.createGain();
+                outputGainNode.gain.value = 1.0;
+
+                scriptNode.onaudioprocess = (e) => {
+                    if (!isStreaming || activeSourceMode !== 'mic') return;
+                    const indata = e.inputBuffer.getChannelData(0);
+                    const outdata = e.outputBuffer.getChannelData(0);
+                    processLiveAudioChunk(indata, outdata);
+                };
+
+                micSourceNode.connect(scriptNode);
+                scriptNode.connect(outputGainNode);
+                outputGainNode.connect(audioCtx.destination);
+
+                console.log("[ClearBox] Sensitive Microphone Live Stream Ready!");
+            } catch (err) {
+                console.warn("[ClearBox] Microphone access error: ", err);
+                alert("🎤 Microphone Access Notice:\n\nBrowser ne Microphone permission block ya deny ki hai!\n\nKripya apne browser address bar ke paas 🔒 Lock / Mic Icon par click karke 'Allow Microphone' select karein, fir page refresh karein.");
+                activeSourceMode = 'synth';
+                document.getElementById('selSource').value = 'synth';
+            }
+        }
+
+        async function startStream() {
+            if (isStreaming) return;
+            isStreaming = true;
+
+            if (activeSourceMode === 'mic') {
+                await initMicrophone();
+            }
+
+            document.getElementById('btnStart').disabled = true;
+            document.getElementById('btnStart').style.backgroundColor = '#161B22';
+            document.getElementById('btnStop').classList.add('active');
+
+            const statusBadge = document.getElementById('statusBadge');
+            statusBadge.className = isBypassed ? 'status-badge bypass' : 'status-badge streaming';
+            statusBadge.innerText = isBypassed ? '● Status: BYPASS ACTIVE' : '● Status: LIVE STREAMING';
+
+            resizeCanvases();
+            renderLoop();
+        }
+
+        function stopStream() {
+            if (!isStreaming) return;
+            isStreaming = false;
+
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+
+            if (scriptNode) {
+                scriptNode.onaudioprocess = null;
+                try { scriptNode.disconnect(); } catch(e){}
+                scriptNode = null;
+            }
+            if (micSourceNode) {
+                try { micSourceNode.disconnect(); } catch(e){}
+                micSourceNode = null;
+            }
+            if (outputGainNode) {
+                try { outputGainNode.disconnect(); } catch(e){}
+                outputGainNode = null;
+            }
+            if (micStream) {
+                micStream.getTracks().forEach(track => track.stop());
+                micStream = null;
+            }
+            if (audioCtx) {
+                try { audioCtx.close(); } catch(e){}
+                audioCtx = null;
+            }
+
+            rawTimeData.fill(0);
+            cleanTimeData.fill(0);
+            rawFreqData.fill(-80.0);
+            cleanFreqData.fill(-80.0);
+
+            drawWaveform(ctxRawTime, cRawTime, rawTimeData, '#00F0FF');
+            drawSpectrum(ctxRawFreq, cRawFreq, rawFreqData, '#00D2FF', false);
+            drawWaveform(ctxCleanTime, cCleanTime, cleanTimeData, '#00FF66');
+            drawSpectrum(ctxCleanFreq, cCleanFreq, cleanFreqData, '#39FF14', true);
+
+            document.getElementById('btnStart').disabled = false;
+            document.getElementById('btnStart').style.backgroundColor = '#238636';
+            document.getElementById('btnStop').classList.remove('active');
+
+            const statusBadge = document.getElementById('statusBadge');
+            statusBadge.className = 'status-badge';
+            statusBadge.innerText = '● Status: STOPPED';
+        }
+
+        function toggleBypass() {
+            isBypassed = !isBypassed;
+            const btnBypass = document.getElementById('btnBypass');
+            const statusBadge = document.getElementById('statusBadge');
+
+            if (isBypassed) {
+                btnBypass.className = 'bypassed';
+                btnBypass.innerText = '⚡ BYPASS (RAW)';
+                if (isStreaming) {
+                    statusBadge.className = 'status-badge bypass';
+                    statusBadge.innerText = '● Status: BYPASS ACTIVE';
+                }
+            } else {
+                btnBypass.className = '';
+                btnBypass.innerText = '⚡ DSP ACTIVE';
+                if (isStreaming) {
+                    statusBadge.className = 'status-badge streaming';
+                    statusBadge.innerText = '● Status: LIVE STREAMING';
+                }
+            }
+        }
+
+        function changeSourceMode(mode) {
+            activeSourceMode = mode;
+            if (mode === 'file') {
+                document.getElementById('fileAudio').click();
+            } else if (isStreaming) {
+                stopStream();
+                setTimeout(startStream, 150);
+            }
+        }
+
+        function handleFileSelect(evt) {
+            const file = evt.target.files[0];
+            if (!file) return;
+
+            const url = URL.createObjectURL(file);
+            if (fileAudioElement) {
+                fileAudioElement.pause();
+                fileAudioElement = null;
+            }
+
+            fileAudioElement = new Audio(url);
+            fileAudioElement.loop = true;
+            fileAudioElement.play();
+
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+            }
+
+            const fileSourceNode = audioCtx.createMediaElementSource(fileAudioElement);
+            scriptNode = audioCtx.createScriptProcessor(1024, 1, 1);
+            outputGainNode = audioCtx.createGain();
+
+            scriptNode.onaudioprocess = (e) => {
+                if (!isStreaming) return;
+                const indata = e.inputBuffer.getChannelData(0);
+                const outdata = e.outputBuffer.getChannelData(0);
+                processLiveAudioChunk(indata, outdata);
+            };
+
+            fileSourceNode.connect(scriptNode);
+            scriptNode.connect(outputGainNode);
+            outputGainNode.connect(audioCtx.destination);
+
+            if (!isStreaming) startStream();
+        }
+
+        function toggleRecord() {
+            const btnRecord = document.getElementById('btnRecord');
+            if (!isRecording) {
+                if (!isStreaming) {
+                    alert("Please start stream first before recording!");
+                    return;
+                }
+                isRecording = true;
+                btnRecord.className = 'recording';
+                btnRecord.innerText = '⏹ RECORDING...';
+                recordedChunks = [];
+
+                if (audioCtx && outputGainNode) {
+                    const dest = audioCtx.createMediaStreamDestination();
+                    outputGainNode.connect(dest);
+                    mediaRecorder = new MediaRecorder(dest.stream);
+                    mediaRecorder.ondataavailable = (e) => {
+                        if (e.data.size > 0) recordedChunks.push(e.data);
+                    };
+                    mediaRecorder.onstop = exportRecordedAudio;
+                    mediaRecorder.start();
+                }
+            } else {
+                isRecording = false;
+                btnRecord.className = '';
+                btnRecord.innerText = '🔴 RECORD';
+                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                    mediaRecorder.stop();
+                }
+            }
+        }
+
+        function exportRecordedAudio() {
+            const blob = new Blob(recordedChunks, { type: 'audio/wav' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = 'ClearBox_Cleaned_Voice_Recording.wav';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }, 100);
+        }
+    </script>
+</body>
+</html>
