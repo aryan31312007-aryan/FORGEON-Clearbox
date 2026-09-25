@@ -1,0 +1,31 @@
+{
+  "name": "forgeon-clearbox-mobile",
+  "version": "2.0.0",
+  "description": "FORGEON ClearBox v2.0 - Mobile Real-Time Audio DSP & Spectrum Visualizer",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server . -p 8080",
+    "build": "node build_app.js",
+    "cap-add": "npx cap add android",
+    "cap-sync": "npx cap sync android",
+    "cap-open": "npx cap open android"
+  },
+  "keywords": [
+    "audio-dsp",
+    "android",
+    "apk",
+    "spectral-subtraction",
+    "wiener-filter",
+    "pwa"
+  ],
+  "author": "FORGEON Labs",
+  "license": "MIT",
+  "devDependencies": {
+    "@capacitor/cli": "^6.0.0",
+    "http-server": "^14.1.1"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/core": "^6.0.0"
+  }
+}

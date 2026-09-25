@@ -1,0 +1,26 @@
+{
+  "name": "FORGEON ClearBox v2.0 - Real-Time Audio DSP",
+  "short_name": "ClearBox",
+  "description": "Multi-Band Wiener Spectral Subtraction & Real-Time Audio DSP Spectrogram Analyzer",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0B0F17",
+  "theme_color": "#0B0F17",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["utilities", "music", "audio", "tools"],
+  "permissions": ["audio-capture"]
+}

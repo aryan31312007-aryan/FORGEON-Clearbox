@@ -1,0 +1,15 @@
+{
+  "appId": "com.forgeon.clearbox",
+  "appName": "ClearBox Audio DSP",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true
+  },
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": true
+  }
+}
